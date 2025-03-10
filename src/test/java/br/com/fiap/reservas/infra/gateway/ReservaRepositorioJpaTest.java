@@ -1,8 +1,10 @@
 package br.com.fiap.reservas.infra.gateway;
 
 import br.com.fiap.reservas.entities.EnderecoEntity;
+import br.com.fiap.reservas.entities.MesaEntity;
 import br.com.fiap.reservas.entities.ReservaEntity;
 import br.com.fiap.reservas.entities.RestauranteEntity;
+import br.com.fiap.reservas.enums.StatusMesa;
 import br.com.fiap.reservas.enums.StatusReserva;
 import br.com.fiap.reservas.infra.repository.reserva.Reserva;
 import br.com.fiap.reservas.infra.repository.reserva.ReservaRepository;
@@ -21,8 +23,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class ReservaRepositorioJpaTest {
     @Mock
@@ -89,14 +90,34 @@ public class ReservaRepositorioJpaTest {
 
     @Test
     void deveAtualizarQtdPessoasReserva() {
-        /*ReservaEntity reservaEntity = new ReservaEntity(new RestauranteEntity(), "Usuario", List.of(), LocalDateTime.now());
+        List<MesaEntity> mesasLivres = List.of(new MesaEntity(1, StatusMesa.LIVRE));
+        RestauranteEntity restauranteEntity = new RestauranteEntity("Restaurante", enderecoEntityMock,
+                "tipoCozinha", LocalTime.now(), LocalTime.now(), 10, mesasLivres);
+
+        ReservaEntity reservaEntity = new ReservaEntity(restauranteEntity, "Usuario", List.of(), LocalDateTime.now());
         Reserva reservaMock = new Reserva(new Restaurante(1L), "Usuario", List.of(), LocalDateTime.now());
 
-        when(reservaRepository.findById(anyLong())).thenReturn(Optional.of(reservaMock));
+        when(reservaRepository.findById(any())).thenReturn(Optional.of(reservaMock));
 
-        assertDoesNotThrow(() -> reservaRepositorioJpa.atualizarQtdPessoasReserva(reservaEntity));
+        reservaRepositorioJpa.atualizarQtdPessoasReserva(reservaEntity);
 
-        verify(reservaRepository).save(any(Reserva.class));*/
+        verify(reservaRepository, times(1)).save(reservaMock);
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoReservaNaoEncontradaNaHoraDeTentarAtualizar() {
+        List<MesaEntity> mesasLivres = List.of(new MesaEntity(1, StatusMesa.LIVRE));
+        RestauranteEntity restauranteEntity = new RestauranteEntity("Restaurante", enderecoEntityMock,
+                "tipoCozinha", LocalTime.now(), LocalTime.now(), 10, mesasLivres);
+
+        ReservaEntity reservaEntity = new ReservaEntity(restauranteEntity, "Usuario", List.of(), LocalDateTime.now());
+
+        when(reservaRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                reservaRepositorioJpa.atualizarQtdPessoasReserva(reservaEntity));
+
+        assertEquals("Reserva não encontrada", exception.getMessage());
     }
 
     @Test

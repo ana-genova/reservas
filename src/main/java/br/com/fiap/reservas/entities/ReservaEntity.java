@@ -102,6 +102,10 @@ public class ReservaEntity {
         return reservaVMesaList;
     }
 
+    public void setReservaVMesaList(List<ReservaVMesa> reservaVMesaList) {
+        this.reservaVMesaList = reservaVMesaList;
+    }
+
     public LocalDateTime getHoraChegada() {
         return horaChegada;
     }

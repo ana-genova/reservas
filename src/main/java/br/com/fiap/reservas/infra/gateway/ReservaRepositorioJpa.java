@@ -107,7 +107,6 @@ public class ReservaRepositorioJpa implements IReservaGateway {
             throw new RuntimeException("Reserva não encontrada");
         }
 
-
     }
 
     @Override
